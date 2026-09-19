@@ -1,9 +1,5 @@
 # Kobi-ERP-AI-Automation
 I-powered ERP automation project built with n8n, Airtable, Base44, OpenAI, Telegram, Gmail and Google Drive.
-מעולה אחי. עכשיו **שלב 2: README מקצועי**. זה העמוד הראשון שהמרצה יראה, אז שווה להשקיע בו 5 דקות.
-
-ב־GitHub תלחץ על `README.md` → אייקון העיפרון **Edit**, תמחק את מה שיש ותדביק את זה:
-
 ````markdown
 # Kobi ERP – AI & Automation
 
