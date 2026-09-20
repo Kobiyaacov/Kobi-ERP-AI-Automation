@@ -1,4 +1,19 @@
 <div dir="rtl">
+<p align="center">
+  <img src="docs/presentation/course-cover.png" alt="מיישמי AI ואוטומציה - מצפן ERP" width="100%">
+</p>
+
+<p align="center">
+  <b>פרויקט גמר בקורס מיישמי AI ואוטומציה</b><br>
+  <b>מרצה:</b> תומר פוקס<br>
+  <b>מגיש:</b> קובי יעקב
+</p>
+
+<p align="center">
+  <a href="https://kobiyaacov.github.io/Kobi-ERP-AI-Automation/">🔗 כניסה למערכת</a>
+  &nbsp;|&nbsp;
+  <a href="https://kobiyaacov.github.io/Kobi-ERP-AI-Automation/docs/workflows/">⚙️ צפייה באתר האוטומציות</a>
+</p>
 
 <p align="center"><img src="docs/presentation/cover.svg" alt="מצפן ERP · קובי יעקב · פרויקט גמר AI ואוטומציה" width="1100"></p>
 
