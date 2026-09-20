@@ -1,0 +1,80 @@
+name: Check workflow viewer links
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/index.html'
+      - 'docs/workflows/**'
+      - '.github/workflows/check-workflow-viewer.yml'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: workflow-viewer-link-check
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify public entrypoints and all 11 flows
+        shell: bash
+        run: |
+          python3 -u - <<'PY'
+          import json
+          import os
+          import re
+          import time
+          import urllib.request
+
+          base = 'https://kobiyaacov.github.io/Kobi-ERP-AI-Automation/'
+          paths = ['', 'workflows/', 'workflows/Kobi_ERP_Workflows.html']
+          last_error = None
+          # The branch-based Pages deployment runs separately. Allow propagation.
+          for attempt in range(1, 13):
+              try:
+                  rows = []
+                  for path in paths:
+                      url = base + path
+                      request = urllib.request.Request(
+                          url + '?verify=' + os.environ.get('GITHUB_RUN_ID', 'manual') + '-' + str(attempt),
+                          headers={'User-Agent': 'Kobi-ERP-link-check', 'Cache-Control': 'no-cache'},
+                      )
+                      with urllib.request.urlopen(request, timeout=8) as response:
+                          status = response.status
+                          html = response.read().decode('utf-8')
+                      if status != 200:
+                          raise RuntimeError(str(status) + ' at ' + url)
+                      if path.endswith('Kobi_ERP_Workflows.html'):
+                          match = re.search(r'<script\b[^>]*id=[\"\x27]project-data[\"\x27][^>]*>(.*?)</script>', html, re.S)
+                          if not match:
+                              raise RuntimeError('Viewer data not found at ' + url)
+                          data = json.loads(match.group(1))
+                          numbers = sorted(flow['num'] for flow in data['flows'])
+                          if numbers != list(range(1, 12)):
+                              raise RuntimeError('Expected flows 1 through 11, got ' + repr(numbers))
+                          if not all(data.get('shots', {}).get(str(n)) for n in range(1, 5)):
+                              raise RuntimeError('Expected embedded screenshots for flows 1 through 4')
+                          detail = '11 flows; screenshots 1-4 present'
+                      else:
+                          target = './workflows/Kobi_ERP_Workflows.html' if path == '' else './Kobi_ERP_Workflows.html'
+                          if 'http-equiv="refresh"' not in html or 'url=' + target not in html:
+                              raise RuntimeError('Entrypoint redirect not deployed yet at ' + url)
+                          detail = 'Entry page links to the interactive viewer'
+                      rows.append('| ' + url + ' | HTTP 200 | ' + detail + ' |')
+                  print('PASS: both entrypoints and the interactive viewer are publicly reachable.')
+                  for row in rows:
+                      print(row)
+                  with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as summary:
+                      summary.write('## Public workflow viewer verification\n\n| URL | Result | Content |\n|---|---|---|\n' + '\n'.join(rows) + '\n')
+                  break
+              except Exception as error:
+                  last_error = error
+                  print('Attempt ' + str(attempt) + ': ' + str(error))
+                  if attempt == 12:
+                      raise SystemExit('Public verification failed: ' + str(last_error))
+                  time.sleep(10)
+          PY
