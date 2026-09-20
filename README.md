@@ -1,25 +1,24 @@
 <div dir="rtl">
+
 <p align="center">
-  <img src="docs/presentation/course-cover.png" alt="מיישמי AI ואוטומציה - מצפן ERP" width="100%">
+  <a href="https://kobiyaacov.github.io/Kobi-ERP-AI-Automation/workflows/Kobi_ERP_Workflows.html">
+    <img src="docs/presentation/JOHN.png" alt="מצפן ERP · פרויקט גמר בקורס מיישמי AI ואוטומציה · מרצה: תומר פוקס · מגיש: קובי יעקב" width="1100">
+  </a>
 </p>
 
 <p align="center">
-  <b>פרויקט גמר בקורס מיישמי AI ואוטומציה</b><br>
-  <b>מרצה:</b> תומר פוקס<br>
-  <b>מגיש:</b> קובי יעקב
+  <strong>פרויקט גמר בקורס מיישמי AI ואוטומציה · 53500</strong><br>
+  פיתוח פתרונות דיגיטליים לפרויקטים עסקיים<br>
+  <strong>מרצה:</strong> תומר פוקס &nbsp;·&nbsp; <strong>מגיש:</strong> קובי יעקב
 </p>
 
-<p align="center">
-  <a href="https://kobiyaacov.github.io/Kobi-ERP-AI-Automation/">🔗 כניסה למערכת</a>
-  &nbsp;|&nbsp;
-  <a href="https://kobiyaacov.github.io/Kobi-ERP-AI-Automation/docs/workflows/">⚙️ צפייה באתר האוטומציות</a>
-</p>
+<h2 align="center">
+  <a href="https://kobiyaacov.github.io/Kobi-ERP-AI-Automation/workflows/Kobi_ERP_Workflows.html">▶ כניסה למפת 11 האוטומציות האינטראקטיבית</a>
+</h2>
 
-<p align="center"><img src="docs/presentation/cover.svg" alt="מצפן ERP · קובי יעקב · פרויקט גמר AI ואוטומציה" width="1100"></p>
+<p align="center"><sub>לחיצה על הכותרת או על תמונת השער פותחת את אתר ההמחשה של הפרויקט, לא את סביבת n8n הפעילה.</sub></p>
 
 <p align="center"><strong>מערכת ניהול פנימית לעסק אלקטרוניקה, עם אוטומציות וסוכני AI.</strong><br>הנתונים ב־Airtable, התהליכים ב־n8n והניהול בממשק Base44.</p>
-
-<p align="center"><a href="https://kobiyaacov.github.io/Kobi-ERP-AI-Automation/"><strong>▶ פתיחת מפת האוטומציות האינטראקטיבית</strong></a></p>
 
 <p align="center"><a href="docs/presentation/README.md"><strong>סיור מצולם במערכת</strong></a> · <a href="docs/workflows/WORKFLOWS.md"><strong>11 התהליכים ב־GitHub</strong></a> · <a href="knowledge/README.md"><strong>מקורות הידע של ה־RAG</strong></a> · <a href="workflows/README.md"><strong>קובצי JSON</strong></a> · <a href="#demo"><strong>איך מדגימים?</strong></a></p>
 
