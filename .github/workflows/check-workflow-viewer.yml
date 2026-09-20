@@ -10,7 +10,6 @@ on:
   workflow_dispatch:
 
 permissions: {}
-
 concurrency:
   group: workflow-viewer-link-check
   cancel-in-progress: true
@@ -20,61 +19,71 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Verify public entrypoints and all 11 flows
+      - name: Verify published workspace, source data and all 11 models
         shell: bash
         run: |
           python3 -u - <<'PY'
-          import json
-          import os
-          import re
-          import time
-          import urllib.request
-
+          import json, os, re, time, urllib.request
           base = 'https://kobiyaacov.github.io/Kobi-ERP-AI-Automation/'
-          paths = ['', 'workflows/', 'workflows/Kobi_ERP_Workflows.html']
-          last_error = None
-          # The branch-based Pages deployment runs separately. Allow propagation.
+          models = ['01-leads-intake.json', '02-sales-cold-emails.json',
+                    '03-policies-embedding.json', '04-products-embedding.json',
+                    '05-customer-service-agent.json', '06-sales-reply-checker.json',
+                    '07-invoice-validation.json', '08-invoice-maker-drive.json',
+                    '09-manager-agent.json', '10-app-api.json', '11-smart-treatment-center.json']
+          def get(path, attempt):
+              request = urllib.request.Request(base + path + '?check=' + os.environ.get('GITHUB_RUN_ID', 'manual') + '-' + str(attempt), headers={'User-Agent': 'Kobi-ERP-workspace-check', 'Cache-Control': 'no-cache'})
+              with urllib.request.urlopen(request, timeout=8) as response:
+                  if response.status != 200:
+                      raise RuntimeError('Non-200 response: ' + path)
+                  return response.read().decode('utf-8')
+          def project_data(html):
+              match = re.search(r'<script\b[^>]*id=[\"\x27]project-data[\"\x27][^>]*>(.*?)</script>', html, re.S)
+              if not match:
+                  raise RuntimeError('Project data missing')
+              return json.loads(match.group(1))
           for attempt in range(1, 13):
               try:
-                  rows = []
-                  for path in paths:
-                      url = base + path
-                      request = urllib.request.Request(
-                          url + '?verify=' + os.environ.get('GITHUB_RUN_ID', 'manual') + '-' + str(attempt),
-                          headers={'User-Agent': 'Kobi-ERP-link-check', 'Cache-Control': 'no-cache'},
-                      )
-                      with urllib.request.urlopen(request, timeout=8) as response:
-                          status = response.status
-                          html = response.read().decode('utf-8')
-                      if status != 200:
-                          raise RuntimeError(str(status) + ' at ' + url)
-                      if path.endswith('Kobi_ERP_Workflows.html'):
-                          match = re.search(r'<script\b[^>]*id=[\"\x27]project-data[\"\x27][^>]*>(.*?)</script>', html, re.S)
-                          if not match:
-                              raise RuntimeError('Viewer data not found at ' + url)
-                          data = json.loads(match.group(1))
-                          numbers = sorted(flow['num'] for flow in data['flows'])
-                          if numbers != list(range(1, 12)):
-                              raise RuntimeError('Expected flows 1 through 11, got ' + repr(numbers))
-                          if not all(data.get('shots', {}).get(str(n)) for n in range(1, 5)):
-                              raise RuntimeError('Expected embedded screenshots for flows 1 through 4')
-                          detail = '11 flows; screenshots 1-4 present'
-                      else:
-                          target = './workflows/Kobi_ERP_Workflows.html' if path == '' else './Kobi_ERP_Workflows.html'
-                          if 'http-equiv="refresh"' not in html or 'url=' + target not in html:
-                              raise RuntimeError('Entrypoint redirect not deployed yet at ' + url)
-                          detail = 'Entry page links to the interactive viewer'
-                      rows.append('| ' + url + ' | HTTP 200 | ' + detail + ' |')
-                  print('PASS: both entrypoints and the interactive viewer are publicly reachable.')
-                  for row in rows:
-                      print(row)
+                  for path in ['', 'workflows/']:
+                      if 'Kobi_ERP_Workflows.html' not in get(path, attempt):
+                          raise RuntimeError('Entry link missing: ' + path)
+                  html = get('workflows/Kobi_ERP_Workflows.html', attempt)
+                  manifest = project_data(html)
+                  if manifest.get('version') != 2:
+                      raise RuntimeError('Workspace update has not propagated yet')
+                  source = project_data(get('workflows/' + manifest['source'], attempt))
+                  if sorted(f['num'] for f in source['flows']) != list(range(1, 12)):
+                      raise RuntimeError('Expected all 11 original flow descriptions')
+                  if not all(source.get('shots', {}).get(str(n), '').startswith('data:image/') for n in [1, 2, 3, 4, 5, 6, 8, 9, 10, 11]):
+                      raise RuntimeError('An original screenshot is missing')
+                  if 'prepareGraph' not in get('workflows/experience.js', attempt):
+                      raise RuntimeError('Workspace JavaScript missing')
+                  if '.canvas-pane' not in get('workflows/experience.css', attempt):
+                      raise RuntimeError('Workspace stylesheet missing')
+                  node_total = 0
+                  for filename in models:
+                      model = json.loads(get('workflows/models/' + filename, attempt))
+                      names = {n['name'] for n in model['nodes']}
+                      node_total += len(names)
+                      if model.get('active') is not False:
+                          raise RuntimeError('Public snapshot must be inactive: ' + filename)
+                      for node in model['nodes']:
+                          if 'credentials' in node:
+                              raise RuntimeError('Unexpected credential reference: ' + filename)
+                      for source_name, ports in model['connections'].items():
+                          if source_name not in names:
+                              raise RuntimeError('Unknown source node: ' + filename)
+                          for outputs in ports.values():
+                              for output in outputs:
+                                  if any(edge['node'] not in names for edge in output):
+                                      raise RuntimeError('Unknown target node: ' + filename)
+                  print('PASS: public entrypoints, HTML, CSS, JavaScript, 11 model snapshots, 11 descriptions and 10 original screenshots.')
+                  print('Model nodes including notes: ' + str(node_total))
                   with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as summary:
-                      summary.write('## Public workflow viewer verification\n\n| URL | Result | Content |\n|---|---|---|\n' + '\n'.join(rows) + '\n')
+                      summary.write('## Workspace publication check\n\nPassed: entrypoints, app assets, 11 graph snapshots, 11 source descriptions and 10 original screenshots.\n\nThis checks static publication and graph structure, not n8n execution or browser interactions.\n')
                   break
               except Exception as error:
-                  last_error = error
                   print('Attempt ' + str(attempt) + ': ' + str(error))
                   if attempt == 12:
-                      raise SystemExit('Public verification failed: ' + str(last_error))
+                      raise SystemExit(str(error))
                   time.sleep(10)
           PY

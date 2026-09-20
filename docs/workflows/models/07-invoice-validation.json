@@ -1,0 +1,419 @@
+{
+  "name": "7 - Invoice Validation - Kobi v2",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        176
+      ],
+      "id": "93c98ed8-240f-4dd5-bcf5-e83fda1c3394",
+      "name": "Every Minute"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "REPLACE_WITH_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "REPLACE_WITH_INVOICE_TABLE_ID",
+          "mode": "id"
+        },
+        "filterByFormula": "{Status}='New'",
+        "returnAll": false,
+        "limit": 1,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        176
+      ],
+      "id": "24ed2e2c-0932-4680-8b8a-5a8e972c6524",
+      "name": "Find Pending Invoice",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c6bd9a84-5573-4afb-9ccc-1a4871777d58",
+              "leftValue": "={{ Number($json.fields.Amount || 0) }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "008ea776-39bb-47e0-9520-8aca4e7bc438",
+              "leftValue": "={{ $json.fields.CustomerId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        976,
+        176
+      ],
+      "id": "606077fa-9c4d-4a07-9d7d-5b4ba9b9dd18",
+      "name": "Validate Invoice"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "REPLACE_WITH_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "REPLACE_WITH_INVOICE_TABLE_ID",
+          "mode": "id"
+        },
+        "filterByFormula": "{InvoiceNumber}!=''",
+        "returnAll": false,
+        "limit": 1,
+        "options": {},
+        "sort": {
+          "property": [
+            {
+              "field": "InvoiceNumber",
+              "direction": "desc"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1280,
+        64
+      ],
+      "id": "9387598c-c4c9-4a64-b131-f00edddd0468",
+      "name": "Find Last Invoice Number",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "77427d5f-a00c-4995-bc85-ef1465d7d2d1",
+              "name": "VatRate",
+              "value": "={{ new Date($('Find Pending Invoice').item.json.fields.Created || $('Find Pending Invoice').item.json.createdTime || Date.now()) >= new Date('2025-01-01') ? 0.18 : 0.17 }}",
+              "type": "number"
+            },
+            {
+              "id": "ce2a85f6-78f9-4234-8d98-a3ab9938c9c3",
+              "name": "VatAmount",
+              "value": "={{ Math.round(Number($('Find Pending Invoice').item.json.fields.Amount || 0) * (new Date($('Find Pending Invoice').item.json.fields.Created || $('Find Pending Invoice').item.json.createdTime || Date.now()) >= new Date('2025-01-01') ? 0.18 : 0.17) * 100) / 100 }}",
+              "type": "number"
+            },
+            {
+              "id": "f665d077-1537-46cb-9e38-64eb323b7671",
+              "name": "Total",
+              "value": "={{ Math.round(Number($('Find Pending Invoice').item.json.fields.Amount || 0) * (1 + (new Date($('Find Pending Invoice').item.json.fields.Created || $('Find Pending Invoice').item.json.createdTime || Date.now()) >= new Date('2025-01-01') ? 0.18 : 0.17)) * 100) / 100 }}",
+              "type": "number"
+            },
+            {
+              "id": "82e0c880-d054-438d-8ca3-8f8e4edc1999",
+              "name": "InvoiceNumber",
+              "value": "={{ 'INV-' + ((parseInt((($('Find Last Invoice Number').item.json.fields?.InvoiceNumber || 'INV-0000').split('-')[1])) || 0) + 1).toString().padStart(4, '0') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1552,
+        64
+      ],
+      "id": "0b6eac22-668a-48a3-8c4b-381b9dbd102c",
+      "name": "Calculate VAT & Number"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "REPLACE_WITH_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "REPLACE_WITH_INVOICE_TABLE_ID",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Find Pending Invoice').item.json.id }}",
+            "InvoiceNumber": "={{ $('Calculate VAT & Number').item.json.InvoiceNumber }}",
+            "VatAmount": "={{ $('Calculate VAT & Number').item.json.VatAmount }}",
+            "Total": "={{ $('Calculate VAT & Number').item.json.Total }}",
+            "Status": "Ready"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "InvoiceNumber",
+              "displayName": "InvoiceNumber",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "VatAmount",
+              "displayName": "VatAmount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Total",
+              "displayName": "Total",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1856,
+        64
+      ],
+      "id": "43b6e242-09aa-4965-ab50-2e3c7bc469fd",
+      "name": "Mark Ready"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "REPLACE_WITH_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "REPLACE_WITH_INVOICE_TABLE_ID",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Find Pending Invoice').item.json.id }}",
+            "Status": "Invalid"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1280,
+        384
+      ],
+      "id": "83243739-b899-45d7-9b34-0f05a9a1ba6b",
+      "name": "Mark Invalid"
+    },
+    {
+      "parameters": {
+        "content": "### Flow 7 · Invoice Validation v2\nתוקן כדי להימנע מ-Airtable Trigger בעייתי בייבוא.\n\nכל דקה מחפש חשבונית עם Status ריק/New → בודק Amount ו-CustomerId → מחשב מע״מ/סה״כ → נותן מספר עוקב → Ready.\nאם לא תקין → Invalid.\n\nKobi ERP",
+        "height": 320,
+        "width": 360,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        96,
+        -288
+      ],
+      "id": "aa45a54e-610b-4816-ba4c-03a02ba9ba65",
+      "name": "Flow Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Every Minute": {
+      "main": [
+        [
+          {
+            "node": "Find Pending Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Pending Invoice": {
+      "main": [
+        [
+          {
+            "node": "Validate Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Invoice": {
+      "main": [
+        [
+          {
+            "node": "Find Last Invoice Number",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Invalid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Last Invoice Number": {
+      "main": [
+        [
+          {
+            "node": "Calculate VAT & Number",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate VAT & Number": {
+      "main": [
+        [
+          {
+            "node": "Mark Ready",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "nodeGroups": [],
+  "tags": []
+}

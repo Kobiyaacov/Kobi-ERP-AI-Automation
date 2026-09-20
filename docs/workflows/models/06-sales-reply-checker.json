@@ -1,0 +1,190 @@
+{
+  "name": "6 - Sales Reply Checker - Kobi",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        368,
+        208
+      ],
+      "id": "746964d6-80dd-4c1c-a333-7552dcbe2e3a",
+      "name": "Every 30 Minutes"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 10,
+        "filters": {
+          "q": "in:inbox newer_than:7d",
+          "readStatus": "both"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        640,
+        208
+      ],
+      "id": "c1fff2ab-de13-4987-a6e1-2167509003b8",
+      "name": "Get Recent Replies"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "REPLACE_WITH_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "REPLACE_WITH_LEADS_TABLE_ID",
+          "mode": "id"
+        },
+        "filterByFormula": "={{ \"AND({Status}='Contacted',{Email}='\" + (($json.From || '').match(/<([^>]+)>/)?.[1] || ($json.From || '').trim()) + \"')\" }}",
+        "returnAll": false,
+        "limit": 1,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        944,
+        208
+      ],
+      "id": "f3965526-f9bd-432a-9568-c62b1d619938",
+      "name": "Find Contacted Lead"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "REPLACE_WITH_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "REPLACE_WITH_LEADS_TABLE_ID",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "Status": "Replied"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1264,
+        208
+      ],
+      "id": "c4041666-4ef1-49cd-b059-3bd962a0e72c",
+      "name": "Mark Replied"
+    },
+    {
+      "parameters": {
+        "content": "### Flow 6 · Sales Reply Checker\nכל 30 דקות בודק הודעות Gmail חדשות מהשבוע האחרון.\nמחלץ את כתובת השולח, מחפש ליד עם Status=Contacted,\nואם נמצאה התאמה מעדכן אותו ל-Replied.\n\nKobi ERP",
+        "height": 260,
+        "width": 330,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "927b6d1a-7a1c-4c98-861b-c244bd5b3f18",
+      "name": "Flow Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Every 30 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Replies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Replies": {
+      "main": [
+        [
+          {
+            "node": "Find Contacted Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Contacted Lead": {
+      "main": [
+        [
+          {
+            "node": "Mark Replied",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "nodeGroups": [],
+  "tags": []
+}

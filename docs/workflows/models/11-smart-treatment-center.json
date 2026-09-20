@@ -1,0 +1,387 @@
+{
+  "name": "11 - Smart Treatment Center - Kobi",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        336,
+        176
+      ],
+      "id": "cfdd7adb-d455-4932-8e1d-3bcbd8ae9625",
+      "name": "Every Hour"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "REPLACE_WITH_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "REPLACE_WITH_LEADS_TABLE_ID",
+          "mode": "id"
+        },
+        "filterByFormula": "{Status}='Replied'",
+        "returnAll": false,
+        "limit": 5,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        640,
+        -112
+      ],
+      "id": "623e41c7-be4a-4d2c-9255-3cde98efde61",
+      "name": "Find Replied Leads"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "REPLACE_WITH_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "REPLACE_WITH_INVOICE_TABLE_ID",
+          "mode": "id"
+        },
+        "filterByFormula": "{Status}='Invalid'",
+        "returnAll": false,
+        "limit": 5,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        640,
+        96
+      ],
+      "id": "47687a62-9cef-4828-943e-bb49b9b89932",
+      "name": "Find Invalid Invoices"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "REPLACE_WITH_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "REPLACE_WITH_INVOICE_TABLE_ID",
+          "mode": "id"
+        },
+        "filterByFormula": "AND({Status}='Ready',{PdfUrl}=BLANK())",
+        "returnAll": false,
+        "limit": 5,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        640,
+        288
+      ],
+      "id": "07355ba9-a78c-45ee-8559-865f5249caf9",
+      "name": "Find Ready Without Document"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "REPLACE_WITH_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "REPLACE_WITH_TASKS_TABLE_ID",
+          "mode": "id"
+        },
+        "filterByFormula": "{Status}='Open'",
+        "returnAll": false,
+        "limit": 5,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        640,
+        496
+      ],
+      "id": "53048c40-41bd-4187-858c-1c5902ca80fb",
+      "name": "Find Open Tasks"
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        976,
+        192
+      ],
+      "id": "09c8597d-7eb7-44bc-874c-d2de8ce448be",
+      "name": "Merge Treatment Items"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "556efe5d-42ba-4fac-9ef0-5d2051a17e54",
+              "name": "kind",
+              "value": "={{ $json.fields?.Title !== undefined ? 'task_open' : (($json.fields?.Name !== undefined || $json.fields?.Email !== undefined) ? 'lead_replied' : ($json.fields?.Status === 'Invalid' ? 'invoice_invalid' : 'invoice_ready')) }}",
+              "type": "string"
+            },
+            {
+              "id": "49ae829d-b8ae-47b3-a7a1-90bbb6eb1fc4",
+              "name": "recordId",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "e58651e2-f016-44e2-b243-2464aefadc00",
+              "name": "priority",
+              "value": "={{ ($json.fields?.Status === 'Invalid' || $json.fields?.Status === 'Replied') ? 'גבוהה' : 'בינונית' }}",
+              "type": "string"
+            },
+            {
+              "id": "419c91a5-200d-4e97-a143-56528aa727c3",
+              "name": "title",
+              "value": "={{ $json.fields?.Title !== undefined ? 'משימה פתוחה: ' + ($json.fields.Title || 'ללא כותרת') : (($json.fields?.Name !== undefined || $json.fields?.Email !== undefined) ? 'ליד חזר: ' + ($json.fields.Name || $json.fields.Email || 'ליד ללא שם') : ($json.fields?.Status === 'Invalid' ? 'חשבונית דורשת בדיקה: ' + ($json.fields.InvoiceNumber || $json.id) : 'חשבונית ממתינה להפקת מסמך: ' + ($json.fields.InvoiceNumber || $json.id))) }}",
+              "type": "string"
+            },
+            {
+              "id": "cbbaff35-3858-4ce5-b22f-9ff343e8952d",
+              "name": "reason",
+              "value": "={{ $json.fields?.Title !== undefined ? 'המשימה עדיין פתוחה.' : (($json.fields?.Name !== undefined || $json.fields?.Email !== undefined) ? 'התקבלה תגובה מהליד. מומלץ לחזור אליו.' : ($json.fields?.Status === 'Invalid' ? 'נתוני החשבונית לא עברו את בדיקת התקינות.' : 'החשבונית מוכנה אך עדיין אין לה קישור למסמך.')) }}",
+              "type": "string"
+            },
+            {
+              "id": "60b58a18-5097-4635-98eb-d47316c7db33",
+              "name": "recommendedAction",
+              "value": "={{ $json.fields?.Title !== undefined ? 'פתח את המשימה וטפל בה.' : (($json.fields?.Name !== undefined || $json.fields?.Email !== undefined) ? 'פתח את הליד או צור משימת טיפול.' : ($json.fields?.Status === 'Invalid' ? 'פתח את החשבונית ובדוק CustomerId ו-Amount.' : 'בדוק את Flow 8 או הרץ את הפקת המסמך.')) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1232,
+        192
+      ],
+      "id": "d5f1deac-5470-42e8-80eb-c8e8d4d99a21",
+      "name": "Normalize Treatment Item"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "items",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1504,
+        192
+      ],
+      "id": "9ae42c3e-338a-4dea-84fd-686285d42cd0",
+      "name": "Aggregate Treatment Items"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b81836d3-bead-46c1-8a7d-6ba7a3778c30",
+              "name": "message",
+              "value": "={{ 'מרכז הטיפול החכם\\n\\n' + ($json.items || []).map((item, i) => (i + 1) + '. עדיפות ' + item.priority + ' | ' + item.title + '\\n' + item.reason + '\\n' + 'הצעה: ' + item.recommendedAction).join('\\n\\n') + '\\n\\nלא בוצעה שום פעולה אוטומטית. החלטה וביצוע נשארים אצל המנהל.' }}",
+              "type": "string"
+            },
+            {
+              "id": "6a295d00-541f-4ba5-825f-c0110a5c5c8a",
+              "name": "itemCount",
+              "value": "={{ ($json.items || []).length }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1760,
+        192
+      ],
+      "id": "9aa70758-0b8d-4349-bf60-29bbc28bec15",
+      "name": "Build Manager Digest"
+    },
+    {
+      "parameters": {
+        "chatId": "REPLACE_WITH_OWNER_CHAT_ID",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2032,
+        192
+      ],
+      "id": "30c64d81-1477-46a1-9e82-523bcdba8f3c",
+      "name": "Send Treatment Digest"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Every Hour": {
+      "main": [
+        [
+          {
+            "node": "Find Replied Leads",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Find Invalid Invoices",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Find Ready Without Document",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Find Open Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Replied Leads": {
+      "main": [
+        [
+          {
+            "node": "Merge Treatment Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Invalid Invoices": {
+      "main": [
+        [
+          {
+            "node": "Merge Treatment Items",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Find Ready Without Document": {
+      "main": [
+        [
+          {
+            "node": "Merge Treatment Items",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Find Open Tasks": {
+      "main": [
+        [
+          {
+            "node": "Merge Treatment Items",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Merge Treatment Items": {
+      "main": [
+        [
+          {
+            "node": "Normalize Treatment Item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Treatment Item": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Treatment Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Treatment Items": {
+      "main": [
+        [
+          {
+            "node": "Build Manager Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Manager Digest": {
+      "main": [
+        [
+          {
+            "node": "Send Treatment Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "nodeGroups": [],
+  "tags": []
+}

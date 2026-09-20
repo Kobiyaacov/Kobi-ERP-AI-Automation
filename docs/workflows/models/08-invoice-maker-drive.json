@@ -1,0 +1,259 @@
+{
+  "name": "8 - Invoice Maker + Drive - Kobi",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        480,
+        272
+      ],
+      "id": "5c862c09-9a0f-45d4-8d14-45d438abad1a",
+      "name": "Every Minute"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "REPLACE_WITH_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "REPLACE_WITH_INVOICE_TABLE_ID",
+          "mode": "id"
+        },
+        "filterByFormula": "AND({Status}='Ready',{PdfUrl}=BLANK())",
+        "returnAll": false,
+        "limit": 1,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        272
+      ],
+      "id": "a304d475-9c5f-42ea-9a8a-47495d766716",
+      "name": "Find Ready Invoice"
+    },
+    {
+      "parameters": {
+        "html": "<!DOCTYPE html>\n<html lang=\"he\" dir=\"rtl\">\n<head>\n<meta charset=\"utf-8\">\n<title>חשבונית {{ $json.fields.InvoiceNumber }}</title>\n<style>\n  body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;margin:0;padding:32px;color:#18212f}\n  .invoice{max-width:760px;margin:0 auto;background:#fff;border:1px solid #e1e6eb;border-radius:14px;padding:34px;box-shadow:0 10px 30px rgba(0,0,0,.06)}\n  .top{display:flex;justify-content:space-between;gap:24px;border-bottom:3px solid #111827;padding-bottom:20px;margin-bottom:28px}\n  .brand{font-size:25px;font-weight:700}\n  .brand small{display:block;font-size:12px;font-weight:400;color:#6b7280;margin-top:6px}\n  .meta{font-size:14px;line-height:1.9;text-align:left}\n  .badge{display:inline-block;background:#111827;color:white;padding:5px 10px;border-radius:999px;font-size:12px}\n  .customer{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;margin-bottom:24px}\n  table{width:100%;border-collapse:collapse;margin-top:10px}\n  th,td{border-bottom:1px solid #e5e7eb;padding:13px 10px;text-align:right}\n  th{background:#f8fafc;font-size:13px}\n  .sum{margin-top:22px;margin-right:auto;width:320px}\n  .sum-row{display:flex;justify-content:space-between;padding:8px 0}\n  .sum-row.total{font-size:18px;font-weight:700;border-top:2px solid #111827;margin-top:6px;padding-top:12px}\n  .foot{margin-top:30px;font-size:12px;color:#6b7280;border-top:1px solid #e5e7eb;padding-top:14px}\n</style>\n</head>\n<body>\n<div class=\"invoice\">\n  <div class=\"top\">\n    <div>\n      <div class=\"brand\">Kobi Smart Electronics\n        <small>מערכת ERP חכמה · פרויקט לימודי</small>\n      </div>\n      <div style=\"margin-top:12px\"><span class=\"badge\">חשבונית מס · דמו</span></div>\n    </div>\n    <div class=\"meta\">\n      <div><b>מספר:</b> {{ $json.fields.InvoiceNumber }}</div>\n      <div><b>תאריך:</b> {{ $now.format('dd/MM/yyyy') }}</div>\n      <div><b>סטטוס:</b> {{ $json.fields.Status }}</div>\n    </div>\n  </div>\n\n  <div class=\"customer\">\n    <b>לקוח:</b> {{ $json.fields.CustomerId }}\n  </div>\n\n  <table>\n    <tr>\n      <th>תיאור</th>\n      <th>סכום לפני מע\"מ</th>\n      <th>מע\"מ</th>\n      <th>סה\"כ</th>\n    </tr>\n    <tr>\n      <td>מוצרי אלקטרוניקה / עסקה</td>\n      <td>{{ $json.fields.Amount }} ₪</td>\n      <td>{{ $json.fields.VatAmount }} ₪</td>\n      <td>{{ $json.fields.Total }} ₪</td>\n    </tr>\n  </table>\n\n  <div class=\"sum\">\n    <div class=\"sum-row\"><span>לפני מע\"מ</span><span>{{ $json.fields.Amount }} ₪</span></div>\n    <div class=\"sum-row\"><span>מע\"מ</span><span>{{ $json.fields.VatAmount }} ₪</span></div>\n    <div class=\"sum-row total\"><span>סה\"כ לתשלום</span><span>{{ $json.fields.Total }} ₪</span></div>\n  </div>\n\n  <div class=\"foot\">\n    מסמך זה הופק אוטומטית על-ידי Kobi ERP לצורכי פרויקט לימודי.\n  </div>\n</div>\n</body>\n</html>"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        272
+      ],
+      "id": "51b723e1-adbf-4bd4-a43a-b9e40177ae65",
+      "name": "Build Invoice HTML"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "html",
+        "options": {
+          "fileName": "=invoice-{{ $('Find Ready Invoice').item.json.fields.InvoiceNumber }}.html"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1328,
+        272
+      ],
+      "id": "4d555c8b-6a78-4055-9d47-f53c5386362e",
+      "name": "Convert HTML to File"
+    },
+    {
+      "parameters": {
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "root",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1632,
+        272
+      ],
+      "id": "a289741b-0451-4571-8f84-8d525f88ee02",
+      "name": "Upload Invoice to Drive"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "REPLACE_WITH_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "REPLACE_WITH_INVOICE_TABLE_ID",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Find Ready Invoice').item.json.id }}",
+            "PdfUrl": "={{ $json.webViewLink }}",
+            "Status": "Issued"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "PdfUrl",
+              "displayName": "PdfUrl",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1952,
+        272
+      ],
+      "id": "8c2f1c76-00af-4842-92e1-e9f9507b7277",
+      "name": "Mark Issued + Save Link"
+    },
+    {
+      "parameters": {
+        "content": "### Flow 8 · Invoice Maker + Google Drive\nכל דקה מחפש Invoice עם Status=Ready ו-PdfUrl ריק.\nבונה מסמך HTML בעברית RTL → הופך לקובץ → מעלה ל-Google Drive → שומר את קישור הצפייה ב-PdfUrl ומעדכן Status=Issued.\n\nהמסמך מסומן כדמו/פרויקט לימודי.\n\nKobi ERP",
+        "height": 340,
+        "width": 390,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        304,
+        -224
+      ],
+      "id": "68b799fe-3c11-405b-a1b1-09ba8cdd7db9",
+      "name": "Flow Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Every Minute": {
+      "main": [
+        [
+          {
+            "node": "Find Ready Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Ready Invoice": {
+      "main": [
+        [
+          {
+            "node": "Build Invoice HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Invoice HTML": {
+      "main": [
+        [
+          {
+            "node": "Convert HTML to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert HTML to File": {
+      "main": [
+        [
+          {
+            "node": "Upload Invoice to Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Invoice to Drive": {
+      "main": [
+        [
+          {
+            "node": "Mark Issued + Save Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "nodeGroups": [],
+  "tags": []
+}
