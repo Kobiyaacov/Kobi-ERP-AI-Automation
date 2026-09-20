@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="310" viewBox="0 0 1440 310" role="img" aria-labelledby="t d">
+<title id="t">מצפן ERP · קובי יעקב</title><desc id="d">ממשק אחד. נתונים, אוטומציה ובינה מלאכותית. פרויקט גמר בקורס מיישם AI ואוטומציה.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#13253b"/><stop offset="1" stop-color="#09121e"/></linearGradient></defs>
+<rect width="1440" height="310" rx="20" fill="url(#bg)"/>
+<g fill="none" stroke="#2b445c"><circle cx="165" cy="120" r="172"/><circle cx="165" cy="120" r="120"/><circle cx="165" cy="120" r="68"/><path d="M165 20v28m0 145v28M65 120h28m145 0h28"/></g>
+<path d="m197 88-20 44-44 20 20-44z" fill="#49c4df" stroke="#87e0ed" stroke-width="2"/><circle cx="165" cy="120" r="5" fill="#13253b"/>
+<rect x="1360" y="46" width="5" height="151" rx="2" fill="#49c4df"/>
+<g font-family="Arial,sans-serif">
+<text x="1322" y="67" text-anchor="end" fill="#78cfdf" font-size="17" letter-spacing="3">KOBI ERP / AI &amp; AUTOMATION</text>
+<text x="1322" y="140" text-anchor="end" fill="#fff" font-size="68" font-weight="700">מצפן ERP</text>
+<text x="1322" y="184" text-anchor="end" fill="#ccd9e5" font-size="25">מהנתון העסקי להחלטה של המנהל</text>
+<text x="1322" y="218" text-anchor="end" fill="#93aabe" font-size="17">קובי יעקב · פרויקט גמר · ג׳ון ברייס</text>
+<text x="165" y="213" text-anchor="middle" fill="#78a1ba" font-size="13" letter-spacing="2">CONNECT. AUTOMATE. MANAGE.</text>
+<path d="M50 247h1340" stroke="#284157"/>
+<g fill="#e6f0f6" font-size="18" text-anchor="middle"><text x="1210" y="285">11 תהליכי אוטומציה</text><text x="870" y="285">6 טבלאות עסקיות</text><text x="525" y="285">2 בוטי Telegram</text><text x="185" y="285">ממשק בעברית · RTL</text></g>
+</g></svg>
