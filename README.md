@@ -4,7 +4,9 @@
 
 <p align="center"><strong>מערכת ניהול פנימית לעסק אלקטרוניקה, עם אוטומציות וסוכני AI.</strong><br>הנתונים ב־Airtable, התהליכים ב־n8n והניהול בממשק Base44.</p>
 
-<p align="center"><a href="https://kobiyaacov.github.io/Kobi-ERP-AI-Automation/"><strong>▶ פתיחת מפת האוטומציות האינטראקטיבית</strong></a></p>\n\n<p align="center"><a href="docs/presentation/README.md"><strong>סיור מצולם במערכת</strong></a> · <a href="docs/workflows/WORKFLOWS.md"><strong>11 התהליכים ב־GitHub</strong></a> · <a href="#demo"><strong>איך מדגימים?</strong></a></p>
+<p align="center"><a href="https://kobiyaacov.github.io/Kobi-ERP-AI-Automation/"><strong>▶ פתיחת מפת האוטומציות האינטראקטיבית</strong></a></p>
+
+<p align="center"><a href="docs/presentation/README.md"><strong>סיור מצולם במערכת</strong></a> · <a href="docs/workflows/WORKFLOWS.md"><strong>11 התהליכים ב־GitHub</strong></a> · <a href="knowledge/README.md"><strong>מקורות הידע של ה־RAG</strong></a> · <a href="#demo"><strong>איך מדגימים?</strong></a></p>
 
 <p align="center"><code>Base44</code> · <code>n8n</code> · <code>Airtable</code> · <code>OpenAI</code> · <code>Telegram</code> · <code>Gmail</code> · <code>Google Drive</code></p>
 
