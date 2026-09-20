@@ -6,7 +6,7 @@
 
 <p align="center"><a href="https://kobiyaacov.github.io/Kobi-ERP-AI-Automation/"><strong>▶ פתיחת מפת האוטומציות האינטראקטיבית</strong></a></p>
 
-<p align="center"><a href="docs/presentation/README.md"><strong>סיור מצולם במערכת</strong></a> · <a href="docs/workflows/WORKFLOWS.md"><strong>11 התהליכים ב־GitHub</strong></a> · <a href="knowledge/README.md"><strong>מקורות הידע של ה־RAG</strong></a> · <a href="#demo"><strong>איך מדגימים?</strong></a></p>
+<p align="center"><a href="docs/presentation/README.md"><strong>סיור מצולם במערכת</strong></a> · <a href="docs/workflows/WORKFLOWS.md"><strong>11 התהליכים ב־GitHub</strong></a> · <a href="knowledge/README.md"><strong>מקורות הידע של ה־RAG</strong></a> · <a href="workflows/README.md"><strong>קובצי JSON</strong></a> · <a href="#demo"><strong>איך מדגימים?</strong></a></p>
 
 <p align="center"><code>Base44</code> · <code>n8n</code> · <code>Airtable</code> · <code>OpenAI</code> · <code>Telegram</code> · <code>Gmail</code> · <code>Google Drive</code></p>
 
@@ -72,7 +72,7 @@
 
 החשבונית היא מסמך דמו ב־HTML, לא PDF; הסטטוס Issued מציין הפקה ולא תשלום. הצ׳אט הפנימי מיועד להסברים ולניסוח, בעוד שבוט המנהל משתמש בכלי קריאת נתונים. מאגר הידע של המוצרים וטבלת המוצרים מתוחזקים בנפרד.
 
-המערכת החיה מיועדת למשתמש מורשה. המצגת במאגר אינה מעניקה גישה אליה. [בתיקיית workflows](workflows/README.md) צורפו ייצואים שנוקו מפרטי חיבור, עם הנחיות והערות לפני הרצה; איסוף יתר הייצואים עדיין נמשך. התיעוד והתמונות אינם תחליף לייצוא התהליכים. פרטי ההתחברות אינם חלק מחומרי ההצגה.
+המערכת החיה מיועדת למשתמש מורשה. המצגת במאגר אינה מעניקה גישה אליה. [בתיקיית workflows](workflows/README.md) נמצאים 11 קובצי JSON שנוקו מפרטי חיבור, עם מקור הגרסה והערות לפני הרצה. Flows 02–04 הם עותקים מוקדמים; איסוף הקבצים אינו אישור שהסט כולו נבדק מחדש בסביבת n8n. התיעוד והתמונות אינם תחליף לייצוא התהליכים. פרטי ההתחברות אינם חלק מחומרי ההצגה.
 
 </details>
 
