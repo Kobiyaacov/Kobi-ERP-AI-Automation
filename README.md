@@ -16,6 +16,10 @@
 
 <p align="center"><sub>תצוגה אינטראקטיבית בסגנון n8n, עם רכיבים, חיבורים והגדרות.</sub></p>
 
+<p align="center">
+  <a href="https://compass-erp-pilot.base44.app"><strong>פתיחת ממשק הניהול ב־Base44</strong></a>
+</p>
+
 <p align="center" dir="ltr">
   <strong>Base44 ↔ n8n ↔ Airtable</strong><br>
   <sub>OpenAI · RAG · Telegram · Gmail · Google Drive</sub>
@@ -30,10 +34,10 @@
 **ניהול ומסמכים** · הממשק מציג לקוחות, הזמנות, מוצרים ומשימות. מסלול החשבוניות בודק את הנתונים, מפיק מסמך HTML ושומר אותו ב־Google Drive.
 
 <p align="center">
-  <a href="docs/presentation/01-dashboard.png">
+  <a href="https://compass-erp-pilot.base44.app">
     <img src="docs/presentation/01-dashboard.png" alt="דשבורד מצפן ERP ב־Base44: לידים לפי סטטוס, משימות פתוחות ומסמכים שהופקו" width="1000">
   </a><br>
-  <sub>דשבורד המערכת ב־Base44.</sub>
+  <sub>דשבורד המערכת ב־Base44. לחיצה על התמונה פותחת את הממשק.</sub>
 </p>
 
 ## כלים למנהל
@@ -46,8 +50,8 @@
 
 ## צפייה בפרויקט
 
-1. פתחו את סביבת האוטומציות מהקישור למעלה.
-2. התחילו ב־Flow 5 לשירות, Flow 9 לניהול או Flow 11 לטיפול. לחיצה על רכיב מציגה את ההגדרות שלו.
+1. פתחו את [ממשק הניהול ב־Base44](https://compass-erp-pilot.base44.app) כדי לראות את המערכת עצמה.
+2. פתחו את סביבת האוטומציות מהקישור למעלה, והתחילו ב־Flow 5 לשירות, Flow 9 לניהול או Flow 11 לטיפול.
 3. עברו לסיור המצולם כדי לראות את התוצאות בממשק, בבוטים וב־Drive.
 
 ## קבצים ותיעוד
